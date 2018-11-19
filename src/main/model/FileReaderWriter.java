@@ -21,7 +21,6 @@ public class FileReaderWriter {
         writer.close();
     }
 
-
     // splitting line up by spaces
     public static ArrayList<String> splitOnSpace(String line) {
         String[] splits = line.split(" ");
