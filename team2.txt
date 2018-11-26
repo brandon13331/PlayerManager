@@ -1,0 +1,2 @@
+t2player1 LW
+t2player2 GK

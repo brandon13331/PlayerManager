@@ -1,13 +1,12 @@
 package ui;
 
-import model.User;
+import model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,7 +16,10 @@ import java.util.List;
 
 public class PlayerManager extends JFrame implements ActionListener {
     private User user;
+    private JRadioButton team1;
+    private JRadioButton team2;
     private DefaultListModel<String> teamOne;
+    private DefaultListModel<String> teamTwo;
     private JTextField field;
     private JLabel label1;
     private JLabel label2;
@@ -31,45 +33,57 @@ public class PlayerManager extends JFrame implements ActionListener {
     }
 
     public PlayerManager() {
-        user = new User();
-
         setTitle("Player Manager");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(1000, 500));
         JPanel panel = new JPanel();
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(13, 13, 13, 13));
         setLayout(new FlowLayout());
 
-        JLabel label = new JLabel("Welcome To Player Manager!");
-        label.setFont(new Font("Arial", Font.BOLD, 32));
-        panel.add(label);
+        // Welcome to player manager
+        JLabel label1 = new JLabel("Welcome To Player Manager!");
+        label1.setFont(new Font("Arial", Font.BOLD, 32));
+        panel.add(label1);
+
+        // Select your team
+        JLabel label2 = new JLabel("Select your team");
+        label2.setFont(new Font("Arial", Font.PLAIN, 27));
+        panel.add(label2);
+
+        // Team 1
+        team1 = new JRadioButton("Team 1");
+        team1.setFont(new Font("Arial", Font.PLAIN, 27));
+        team1.setSelected(true);
+
+        // Team 2
+        team2 = new JRadioButton("Team 2");
+        team2.setFont(new Font("Arial", Font.PLAIN, 27));
+
+        // Select button
+        JButton button = new JButton("Select");
+        button.setActionCommand("select");
+        button.setFont(new Font("Arial", Font.PLAIN, 27));
 
         add(panel);
+        add(team1);
+        add(team2);
+        add(button);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
 
-        JRadioButton team1 = new JRadioButton("Team 1");
-        team1.setMnemonic(KeyEvent.VK_B);
-        team1.setActionCommand("team1");
-        team1.setSelected(true);
-
-        JRadioButton team2 = new JRadioButton("Team 2");
-        team2.setMnemonic(KeyEvent.VK_C);
-        team2.setActionCommand("team2");
-
-        add(team1);
-        add(team2);
-
         ButtonGroup group = new ButtonGroup();
         group.add(team1);
         group.add(team2);
 
-        team1.addActionListener(new ActionListener() {
+        button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                if (evt.getActionCommand().equals("team1")) {
+                // Initialize user
+                user = new User();
+
+                // Team 1 selected
+                if (team1.isSelected() && evt.getActionCommand().equals("select")) {
                     teamOne = new DefaultListModel<>();
                     List<String> lines = null;
                     try {
@@ -78,30 +92,23 @@ public class PlayerManager extends JFrame implements ActionListener {
                     }
                     for (String line : lines) {
                         ArrayList<String> partsOfLine = splitOnSpace(line);
-                        String name = partsOfLine.get(0);
-                        teamOne.addElement(name);
+                        addPlayer(partsOfLine);
                     }
                     option();
                 }
-            }
-        });
-        team2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                if (evt.getActionCommand().equals("team2")) {
-
-                    DefaultListModel<String> list = new DefaultListModel<>();
-                    list.addElement("team2");
-                    JList<String> jList = new JList<>(list);
-                    add(jList);
-
-                    // Font
-                    jList.setFont(new Font("Arial", Font.BOLD, 32));
-
-                    // Scrollpane
-                    add(new JScrollPane(jList));
-
-                    setVisible(true);
+                // Team 2 selected
+                else if (team2.isSelected() && evt.getActionCommand().equals("select")) {
+                    teamTwo = new DefaultListModel<>();
+                    List<String> lines = null;
+                    try {
+                        lines = Files.readAllLines(Paths.get("team2.txt"));
+                    } catch (IOException e) {
+                    }
+                    for (String line : lines) {
+                        ArrayList<String> partsOfLine = splitOnSpace(line);
+                        addPlayer(partsOfLine);
+                    }
+                    option();
                 }
             }
         });
@@ -149,6 +156,7 @@ public class PlayerManager extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
+        // 1 entered
         if (evt.getActionCommand().equals("enter") && field.getText().equals("1")) {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
@@ -160,7 +168,25 @@ public class PlayerManager extends JFrame implements ActionListener {
             JPanel panel1 = new JPanel();
             frame.add(panel1);
 
-            JList<String> jList = new JList<>(teamOne);
+            JList<String> jList = new JList<>();
+            // Team 1 was selected
+            if (team1.isSelected()) {
+                for (int i = 0; i < user.getPlayers().size(); i++) {
+                    if (!teamOne.contains(user.getPlayers().get(i).getName())) {
+                        teamOne.addElement(user.getPlayers().get(i).getName());
+                    }
+                }
+                jList = new JList<>(teamOne);
+            }
+            // Team 2 was selected
+            else if (team2.isSelected()) {
+                for (int i = 0; i < user.getPlayers().size(); i++) {
+                    if (!teamTwo.contains(user.getPlayers().get(i).getName())) {
+                        teamTwo.addElement(user.getPlayers().get(i).getName());
+                    }
+                }
+                jList = new JList<>(teamTwo);
+            }
             frame.add(jList);
 
             // Font
@@ -170,7 +196,9 @@ public class PlayerManager extends JFrame implements ActionListener {
             frame.add(new JScrollPane(jList));
 
             frame.setVisible(true);
-        } else if (evt.getActionCommand().equals("enter") && field.getText().equals("2")) {
+        }
+        // 2 entered
+        else if (evt.getActionCommand().equals("enter") && field.getText().equals("2")) {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -207,6 +235,18 @@ public class PlayerManager extends JFrame implements ActionListener {
             add(new JScrollPane(jList));
 
             setVisible(true);
+        }
+    }
+
+    public void addPlayer(ArrayList<String> list) {
+        if (list.get(1).contains("W") || list.get(1).contains("ST")) {
+            user.getPlayers().add(new Forward(list.get(0)));
+        } else if (list.get(1).contains("M")) {
+            user.getPlayers().add(new Midfielder(list.get(0)));
+        } else if (list.get(1).contains("B")) {
+            user.getPlayers().add(new Defender(list.get(0)));
+        } else if (list.get(1).contains("GK")) {
+            user.getPlayers().add(new Goalkeeper(list.get(0)));
         }
     }
 

@@ -22,6 +22,16 @@ public class User {
         return players;
     }
 
+    public ArrayList<Player> getForwards() {
+        ArrayList<Player> forwards = new ArrayList<>();
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getName().contains("W") || players.get(i).getName().contains("W")) {
+                forwards.add(players.get(i));
+            }
+        }
+        return forwards;
+    }
+
     public Wallet getWallet() {
         return wallet;
     }
