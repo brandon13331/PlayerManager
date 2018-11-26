@@ -4,13 +4,13 @@ public abstract class Player {
     private String name;
     private String position;
     private int ratings;
-    private double price;
+    private int price;
 
     public Player(String name, String position) {
         this.name = name;
         this.position = position;
         ratings = 0;
-        price = 0.0;
+        price = 0;
     }
 
     // EFFECTS: returns the name of a player
@@ -28,7 +28,7 @@ public abstract class Player {
         return ratings;
     }
 
-    public double getPrice() {
+    public int getPrice() {
         return price;
     }
 }

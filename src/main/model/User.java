@@ -1,18 +1,17 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class User {
     private String id;
     private Account account;
+    private ArrayList<Player> players;
 
-    public User() {
-        id = "";
-        account = new Account();
-    }
-
-    public void setID(String id) {
+    public User(String id) {
         this.id = id;
+        account = new Account();
+        players = new ArrayList<>();
     }
 
     public String getID() {
@@ -21,6 +20,10 @@ public class User {
 
     public Account getAccount() {
         return account;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
     }
 
     @Override
