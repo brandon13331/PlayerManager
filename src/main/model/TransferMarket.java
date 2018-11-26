@@ -4,15 +4,14 @@ import exceptions.IncorrectPosition;
 import exceptions.InsufficientBalance;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public abstract class TransferMarket {
-    private List<Player> players;
+    private ArrayList<Player> players;
     private User user;
 
     public TransferMarket() {
         players = new ArrayList<>();
-        user = new User("");
+        user = new User();
     }
 
     public void addPlayer(Player player) throws IncorrectPosition {
@@ -45,5 +44,9 @@ public abstract class TransferMarket {
             }
             user.getWallet().addBalance(player.getPrice());
         }
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
     }
 }

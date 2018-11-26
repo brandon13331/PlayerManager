@@ -14,7 +14,7 @@ public abstract class Player {
         position = "";
         ratings = 0;
         price = 0;
-        user = new User("");
+        user = new User();
     }
 
     public void setPosition(String position) throws IncorrectPosition {
@@ -43,5 +43,9 @@ public abstract class Player {
     public void setUser(User user) {
         this.user = user;
         user.addPlayer(this);
+    }
+
+    public User getUser() {
+        return user;
     }
 }

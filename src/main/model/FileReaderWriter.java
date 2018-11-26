@@ -9,13 +9,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FileReaderWriter {
+    private ArrayList<String> names = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+        new FileReaderWriter();
+
+    }
+
+    public FileReaderWriter() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("inputfile.txt"));
         PrintWriter writer = new PrintWriter("outputfile.txt", "UTF-8");
         for (String line : lines) {
             ArrayList<String> partsOfLine = splitOnSpace(line);
-            System.out.print("Name: " + partsOfLine.get(0) + " " + partsOfLine.get(1) + " ");
+            String name = partsOfLine.get(0);
+            names.add(name);
             writer.println(line);
         }
         writer.close();

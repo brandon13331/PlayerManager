@@ -3,22 +3,12 @@ package model;
 import java.util.ArrayList;
 
 public class User {
-    private String id;
     private Wallet wallet;
     private ArrayList<Player> players;
 
-    public User(String id) {
-        this.id = id;
-        wallet = new Wallet();
+    public User() {
         players = new ArrayList<>();
-    }
-
-    public String getID() {
-        return id;
-    }
-
-    public Wallet getWallet() {
-        return wallet;
+        wallet = new Wallet();
     }
 
     public void addPlayer(Player player) {
@@ -30,5 +20,9 @@ public class User {
 
     public ArrayList<Player> getPlayers() {
         return players;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
     }
 }
