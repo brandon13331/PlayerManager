@@ -28,7 +28,7 @@ public abstract class TransferMarket {
     }
 
     public void buyPlayer(Player player, User user) throws InsufficientBalance {
-        if (user.getAccount().getBalance() < player.getPrice()) {
+        if (user.getWallet().getBalance() < player.getPrice()) {
             throw new InsufficientBalance();
         }
         user.getPlayers().add(player);
@@ -43,7 +43,7 @@ public abstract class TransferMarket {
             } catch (IncorrectPosition e) {
                 System.out.println();
             }
-            user.getAccount().addBalance(player.getPrice());
+            user.getWallet().addBalance(player.getPrice());
         }
     }
 }

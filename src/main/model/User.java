@@ -1,16 +1,15 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class User {
     private String id;
-    private Account account;
+    private Wallet wallet;
     private ArrayList<Player> players;
 
     public User(String id) {
         this.id = id;
-        account = new Account();
+        wallet = new Wallet();
         players = new ArrayList<>();
     }
 
@@ -18,25 +17,18 @@ public class User {
         return id;
     }
 
-    public Account getAccount() {
-        return account;
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void addPlayer(Player player) {
+        if (!players.contains(player)) {
+            players.add(player);
+            player.setUser(this);
+        }
     }
 
     public ArrayList<Player> getPlayers() {
         return players;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id);
     }
 }

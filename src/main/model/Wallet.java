@@ -1,9 +1,9 @@
 package model;
 
-public class Account {
+public class Wallet {
     private int balance;
 
-    public Account() {
+    public Wallet() {
         this.balance = 0;
     }
 

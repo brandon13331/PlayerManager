@@ -1,16 +1,24 @@
 package model;
 
+import exceptions.IncorrectPosition;
+
 public abstract class Player {
     private String name;
     private String position;
     private int ratings;
     private int price;
+    private User user;
 
-    public Player(String name, String position) {
+    public Player(String name) {
         this.name = name;
-        this.position = position;
+        position = "";
         ratings = 0;
         price = 0;
+        user = new User("");
+    }
+
+    public void setPosition(String position) throws IncorrectPosition {
+        this.position = position;
     }
 
     // EFFECTS: returns the name of a player
@@ -30,5 +38,10 @@ public abstract class Player {
 
     public int getPrice() {
         return price;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        user.addPlayer(this);
     }
 }
