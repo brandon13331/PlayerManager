@@ -1,4 +1,0 @@
-t1player1 ST
-t1player2 CM
-t1player3 CB
-t1player4 GK

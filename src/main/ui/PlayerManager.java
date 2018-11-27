@@ -4,6 +4,7 @@ import model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,17 +17,13 @@ import java.util.List;
 
 public class PlayerManager extends JFrame implements ActionListener {
     private User user;
-    private JRadioButton team1;
-    private JRadioButton team2;
-    private DefaultListModel<String> teamOne;
-    private DefaultListModel<String> teamTwo;
+    private TransferMarket market;
+    private JRadioButton rButton1;
+    private JRadioButton rButton2;
     private JTextField field;
     private JLabel label1;
     private JLabel label2;
     private JLabel label3;
-    private JButton enterButton;
-    private JButton button1;
-    private JButton button2;
 
     public static void main(String[] args) {
         new PlayerManager();
@@ -36,77 +33,79 @@ public class PlayerManager extends JFrame implements ActionListener {
         setTitle("Player Manager");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(1000, 500));
-        JPanel panel = new JPanel();
         setLayout(new FlowLayout());
+
+        JPanel panel1 = new JPanel();
+        JPanel panel2 = new JPanel();
 
         // Welcome to player manager
         JLabel label1 = new JLabel("Welcome To Player Manager!");
         label1.setFont(new Font("Arial", Font.BOLD, 32));
-        panel.add(label1);
+        panel1.add(label1);
+        panel1.setLayout(new GridLayout(1, 1));
 
-        // Select your team
-        JLabel label2 = new JLabel("Select your team");
+        // Select team
+        JLabel label2 = new JLabel("Select team");
         label2.setFont(new Font("Arial", Font.PLAIN, 27));
-        panel.add(label2);
+        panel2.add(label2);
+        panel2.setLayout(new GridLayout(1, 1));
 
-        // Team 1
-        team1 = new JRadioButton("Team 1");
-        team1.setFont(new Font("Arial", Font.PLAIN, 27));
-        team1.setSelected(true);
+        // Team
+        rButton1 = new JRadioButton("Team A");
+        rButton1.setFont(new Font("Arial", Font.PLAIN, 27));
 
-        // Team 2
-        team2 = new JRadioButton("Team 2");
-        team2.setFont(new Font("Arial", Font.PLAIN, 27));
+        rButton2 = new JRadioButton("Team B");
+        rButton2.setFont(new Font("Arial", Font.PLAIN, 27));
+
+        // Select default
+        rButton1.setSelected(true);
 
         // Select button
-        JButton button = new JButton("Select");
-        button.setActionCommand("select");
-        button.setFont(new Font("Arial", Font.PLAIN, 27));
+        JButton selectButton = new JButton("Select");
+        selectButton.setActionCommand("select");
+        selectButton.setFont(new Font("Arial", Font.PLAIN, 27));
 
-        add(panel);
-        add(team1);
-        add(team2);
-        add(button);
+        add(panel1);
+        add(panel2);
+        add(rButton1);
+        add(rButton2);
+        add(selectButton);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
 
+        // Only one radio button selection allowed
         ButtonGroup group = new ButtonGroup();
-        group.add(team1);
-        group.add(team2);
+        group.add(rButton1);
+        group.add(rButton2);
 
-        button.addActionListener(new ActionListener() {
+        selectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 // Initialize user
                 user = new User();
+                market = new TransferMarket();
 
-                // Team 1 selected
-                if (team1.isSelected() && evt.getActionCommand().equals("select")) {
-                    teamOne = new DefaultListModel<>();
+                // Team A selected
+                if (rButton1.isSelected() && evt.getActionCommand().equals("select")) {
                     List<String> lines = null;
                     try {
-                        lines = Files.readAllLines(Paths.get("team1.txt"));
+                        lines = Files.readAllLines(Paths.get("teamA.txt"));
                     } catch (IOException e) {
                     }
                     for (String line : lines) {
                         ArrayList<String> partsOfLine = splitOnSpace(line);
-                        addPlayer(partsOfLine);
+                        addPlayerToUser(partsOfLine);
                     }
-                    option();
-                }
-                // Team 2 selected
-                else if (team2.isSelected() && evt.getActionCommand().equals("select")) {
-                    teamTwo = new DefaultListModel<>();
-                    List<String> lines = null;
+                    List<String> lines2 = null;
                     try {
-                        lines = Files.readAllLines(Paths.get("team2.txt"));
+                        lines2 = Files.readAllLines(Paths.get("buyable.txt"));
                     } catch (IOException e) {
                     }
-                    for (String line : lines) {
+                    for (String line : lines2) {
                         ArrayList<String> partsOfLine = splitOnSpace(line);
-                        addPlayer(partsOfLine);
+                        addPlayerToMarket(partsOfLine);
                     }
                     option();
                 }
@@ -129,23 +128,26 @@ public class PlayerManager extends JFrame implements ActionListener {
         ((JPanel) getContentPane()).setBorder(new EmptyBorder(13, 13, 13, 13));
         frame.setLayout(new FlowLayout());
 
-        label1 = new JLabel("Enter:");
-        label1.setFont(new Font("Arial", Font.BOLD, 16));
+        label1 = new JLabel("Enter");
+        label1.setFont(new Font("Arial", Font.BOLD, 32));
         panel1.add(label1);
 
-        label2 = new JLabel("1. to see your players");
-        label2.setFont(new Font("Arial", Font.PLAIN, 16));
+        label2 = new JLabel("1. Club Management");
+        label2.setFont(new Font("Arial", Font.PLAIN, 32));
         panel2.add(label2);
 
-        label3 = new JLabel("2. to buy or sell players");
-        label3.setFont(new Font("Arial", Font.PLAIN, 16));
+        label3 = new JLabel("2. Transfer Market");
+        label3.setFont(new Font("Arial", Font.PLAIN, 32));
         panel3.add(label3);
 
-        enterButton = new JButton("Enter");
+        JButton enterButton = new JButton("Enter");
+        enterButton.setFont(new Font("Arial", Font.PLAIN, 32));
         enterButton.setActionCommand("enter");
         enterButton.addActionListener(this);
 
-        field = new JTextField(5);
+        field = new JTextField();
+        field.setPreferredSize(new Dimension(80, 30));
+        field.setFont(new Font("Arial", Font.PLAIN, 32));
 
         frame.add(panel1);
         frame.add(panel2);
@@ -156,7 +158,10 @@ public class PlayerManager extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        // 1 entered
+        // JTable
+        DefaultTableModel model = new DefaultTableModel();
+
+        // Option 1
         if (evt.getActionCommand().equals("enter") && field.getText().equals("1")) {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
@@ -164,93 +169,328 @@ public class PlayerManager extends JFrame implements ActionListener {
             frame.setSize(500, 400);
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
+            frame.setLayout(new FlowLayout());
 
-            JPanel panel1 = new JPanel();
-            frame.add(panel1);
-
-            JList<String> jList = new JList<>();
-            // Team 1 was selected
-            if (team1.isSelected()) {
+            // Team A
+            if (rButton1.isSelected()) {
+                // Column
+                String[] Column = {"Position", "Name"};
+                model.setColumnIdentifiers(Column);
+                // Row
                 for (int i = 0; i < user.getPlayers().size(); i++) {
-                    if (!teamOne.contains(user.getPlayers().get(i).getName())) {
-                        teamOne.addElement(user.getPlayers().get(i).getName());
+                    String position = "";
+                    if (user.getPlayers().get(i).getPosition().contains("W") || user.getPlayers().get(i).getPosition().contains("ST")) {
+                        position = "Forward";
+                    } else if (user.getPlayers().get(i).getPosition().contains("M")) {
+                        position = "Midfielder";
+                    } else if (user.getPlayers().get(i).getPosition().contains("B")) {
+                        position = "Defender";
+                    } else {
+                        position = "Goalkeeper";
                     }
+                    String name = user.getPlayers().get(i).getName();
+
+                    Object[] data = {position, name};
+                    model.addRow(data);
                 }
-                jList = new JList<>(teamOne);
-            }
-            // Team 2 was selected
-            else if (team2.isSelected()) {
-                for (int i = 0; i < user.getPlayers().size(); i++) {
-                    if (!teamTwo.contains(user.getPlayers().get(i).getName())) {
-                        teamTwo.addElement(user.getPlayers().get(i).getName());
+                JTable table = new JTable(model);
+                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+                table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                table.setFillsViewportHeight(true);
+
+                // Table header
+                frame.add(new JScrollPane(table));
+
+                // See details button
+                JButton button = new JButton("Show details");
+                button.setActionCommand("detail");
+                frame.add(button);
+
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getActionCommand().equals("detail")) {
+                            JFrame frame = new JFrame();
+                            frame.setTitle("Player Manager");
+                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            frame.setSize(500, 400);
+                            frame.setLocationRelativeTo(null);
+                            frame.setResizable(false);
+                            frame.setLayout(new FlowLayout());
+
+                            JPanel panel1 = new JPanel();
+                            JPanel panel2 = new JPanel();
+                            JPanel panel3 = new JPanel();
+                            JPanel panel4 = new JPanel();
+
+                            JLabel labelname1 = new JLabel("Name:");
+                            labelname1.setFont(new Font("Arial", Font.BOLD, 32));
+                            JLabel labelname2 = new JLabel(user.getPlayers().get(table.getSelectedRow()).getName());
+                            labelname2.setFont(new Font("Arial", Font.PLAIN, 32));
+
+                            panel1.add(labelname1);
+                            panel1.add(labelname2);
+
+                            JLabel labelposition1 = new JLabel("Position:");
+                            labelposition1.setFont(new Font("Arial", Font.BOLD, 32));
+                            JLabel labelposition2 = new JLabel(user.getPlayers().get(table.getSelectedRow()).getPosition());
+                            labelposition2.setFont(new Font("Arial", Font.PLAIN, 32));
+
+                            panel2.add(labelposition1);
+                            panel2.add(labelposition2);
+
+                            JLabel labelratings1 = new JLabel("Ratings:");
+                            labelratings1.setFont(new Font("Arial", Font.BOLD, 32));
+                            JLabel labelratings2 = new JLabel(String.valueOf(user.getPlayers().get(table.getSelectedRow()).getRatings()));
+                            labelratings2.setFont(new Font("Arial", Font.PLAIN, 32));
+
+                            panel3.add(labelratings1);
+                            panel3.add(labelratings2);
+
+                            JLabel labelprice1 = new JLabel("Price:");
+                            labelprice1.setFont(new Font("Arial", Font.BOLD, 32));
+                            JLabel labelprice2 = new JLabel(String.valueOf(user.getPlayers().get(table.getSelectedRow()).getPrice()));
+                            labelprice2.setFont(new Font("Arial", Font.PLAIN, 32));
+
+                            panel4.add(labelprice1);
+                            panel4.add(labelprice2);
+
+                            frame.add(panel1);
+                            frame.add(panel2);
+                            frame.add(panel3);
+                            frame.add(panel4);
+
+                            frame.setVisible(true);
+                        }
                     }
-                }
-                jList = new JList<>(teamTwo);
+                });
+
+                JButton sellButton = new JButton("Sell");
+                sellButton.setActionCommand("sell");
+                frame.add(sellButton);
+
+                sellButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getActionCommand().equals("sell")) {
+                            JFrame frame = new JFrame();
+                            frame.setTitle("Player Manager");
+                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            frame.setSize(500, 400);
+                            frame.setLocationRelativeTo(null);
+                            frame.setResizable(false);
+                            frame.setLayout(new FlowLayout());
+
+                            JPanel panel1 = new JPanel();
+                            JPanel panel2 = new JPanel();
+                            JPanel panel3 = new JPanel();
+
+                            JLabel label1 = new JLabel("Confirm player:" + " " + user.getPlayers().get(table.getSelectedRow()).getName());
+                            label1.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel1.add(label1);
+
+                            JLabel label2 = new JLabel("Your balance:" + " " + user.getWallet().getBalance());
+                            label2.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel2.add(label2);
+
+                            JLabel label3 = new JLabel("After purchase balance:" + " " + (user.getWallet().getBalance() - user.getPlayers().get(table.getSelectedRow()).getPrice()));
+                            label3.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel2.add(label2);
+
+                            frame.add(panel1);
+                            frame.add(panel2);
+                            frame.add(panel3);
+                            frame.setVisible(true);
+                        }
+                    }
+                });
+                frame.setVisible(true);
             }
-            frame.add(jList);
-
-            // Font
-            jList.setFont(new Font("Arial", Font.BOLD, 32));
-
-            // Scrollpane
-            frame.add(new JScrollPane(jList));
-
-            frame.setVisible(true);
         }
-        // 2 entered
+
+        // Option 2
         else if (evt.getActionCommand().equals("enter") && field.getText().equals("2")) {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(500, 500);
+            frame.setSize(500, 400);
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
+            frame.setLayout(new FlowLayout());
 
-            JPanel panel1 = new JPanel();
-            frame.add(panel1);
+            // Team A
+            if (rButton1.isSelected()) {
+                // Column
+                String[] Column = {"Position", "Name"};
+                model.setColumnIdentifiers(Column);
 
-            DefaultListModel<String> list = new DefaultListModel<>();
-            list.addElement("b");
-            JList<String> jList = new JList<>(list);
-            frame.add(jList);
+                // Row
+                for (int i = 0; i < market.getPlayers().size(); i++) {
+                    String position = "";
+                    if (market.getPlayers().get(i).getPosition().contains("W") || market.getPlayers().get(i).getPosition().contains("ST")) {
+                        position = "Forward";
+                    } else if (market.getPlayers().get(i).getPosition().contains("M")) {
+                        position = "Midfielder";
+                    } else if (market.getPlayers().get(i).getPosition().contains("B")) {
+                        position = "Defender";
+                    } else {
+                        position = "Goalkeeper";
+                    }
+                    String name = market.getPlayers().get(i).getName();
 
-            // Font
-            jList.setFont(new Font("Arial", Font.BOLD, 32));
+                    Object[] data = {position, name};
+                    model.addRow(data);
+                }
+                JTable table = new JTable(model);
+                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+                table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                table.setFillsViewportHeight(true);
 
-            // Scrollpane
-            frame.add(new JScrollPane(jList));
+                // Table header
+                frame.add(new JScrollPane(table));
 
-            frame.setVisible(true);
-        }
-        if (evt.getActionCommand().equals("button2")) {
-            DefaultListModel<String> list = new DefaultListModel<>();
-            list.addElement("b");
-            JList<String> jList = new JList<>(list);
-            add(jList);
+                // See details button
+                JButton detailButton = new JButton("Show details");
+                detailButton.setActionCommand("detail");
+                frame.add(detailButton);
 
-            // Font
-            jList.setFont(new Font("Arial", Font.BOLD, 32));
+                detailButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getActionCommand().equals("detail")) {
+                            JFrame frame = new JFrame();
+                            frame.setTitle("Player Manager");
+                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            frame.setSize(500, 400);
+                            frame.setLocationRelativeTo(null);
+                            frame.setResizable(false);
+                            frame.setLayout(new FlowLayout());
 
-            // Scrollpane
-            add(new JScrollPane(jList));
+                            JPanel panel1 = new JPanel();
+                            JPanel panel2 = new JPanel();
+                            JPanel panel3 = new JPanel();
 
-            setVisible(true);
+                            label1 = new JLabel("Name" + " " + market.getPlayers().get(table.getSelectedRow()).getName());
+                            label1.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel1.add(label1);
+
+                            label2 = new JLabel("Position" + " " + market.getPlayers().get(table.getSelectedRow()).getPosition());
+                            label2.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel2.add(label2);
+
+                            label3 = new JLabel("Ratings" + " " + market.getPlayers().get(table.getSelectedRow()).getRatings());
+                            label3.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel3.add(label3);
+
+                            frame.add(panel1);
+                            frame.add(panel2);
+                            frame.add(panel3);
+                            frame.setVisible(true);
+                        }
+                    }
+                });
+
+                JButton purchaseButton = new JButton("Purchase");
+                purchaseButton.setActionCommand("purchase");
+                frame.add(purchaseButton);
+
+                purchaseButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getActionCommand().equals("purchase")) {
+                            JFrame frame = new JFrame();
+                            frame.setTitle("Player Manager");
+                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            frame.setSize(500, 400);
+                            frame.setLocationRelativeTo(null);
+                            frame.setResizable(false);
+                            frame.setLayout(new FlowLayout());
+
+                            JPanel panel1 = new JPanel();
+                            JPanel panel2 = new JPanel();
+                            JPanel panel3 = new JPanel();
+
+                            JLabel label1 = new JLabel("Confirm purchase player:" + " " + market.getPlayers().get(table.getSelectedRow()).getName());
+                            label1.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel1.add(label1);
+
+                            JLabel label2 = new JLabel("Your balance:" + " " + user.getWallet().getBalance());
+                            label2.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel2.add(label2);
+
+                            JLabel label3 = new JLabel("After purchase balance:" + " " + (user.getWallet().getBalance() - market.getPlayers().get(table.getSelectedRow()).getPrice()));
+                            label3.setFont(new Font("Arial", Font.PLAIN, 16));
+                            panel2.add(label2);
+
+                            frame.add(panel1);
+                            frame.add(panel2);
+                            frame.add(panel3);
+                            frame.setVisible(true);
+
+                            JButton confirmButton = new JButton("Confirm");
+                            confirmButton.setActionCommand("confirm");
+                            frame.add(confirmButton);
+
+                            confirmButton.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    model.removeRow(table.getSelectedRow());
+                                    frame.dispose();
+                                }
+                            });
+                        }
+                    }
+                });
+                frame.setVisible(true);
+            }
         }
     }
 
-    public void addPlayer(ArrayList<String> list) {
+    public void addPlayerToUser(ArrayList<String> list) {
         if (list.get(1).contains("W") || list.get(1).contains("ST")) {
-            user.getPlayers().add(new Forward(list.get(0)));
+            Forward forward = new Forward(list.get(0), list.get(1));
+            forward.setRatings(Integer.parseInt(list.get(2)));
+            forward.setPrice();
+            user.getPlayers().add(forward);
         } else if (list.get(1).contains("M")) {
-            user.getPlayers().add(new Midfielder(list.get(0)));
+            Midfielder midfielder = new Midfielder(list.get(0), list.get(1));
+            midfielder.setRatings(Integer.parseInt(list.get(2)));
+            midfielder.setPrice();
+            user.getPlayers().add(midfielder);
         } else if (list.get(1).contains("B")) {
-            user.getPlayers().add(new Defender(list.get(0)));
+            Defender defender = new Defender(list.get(0), list.get(1));
+            defender.setRatings(Integer.parseInt(list.get(2)));
+            defender.setPrice();
+            user.getPlayers().add(defender);
         } else if (list.get(1).contains("GK")) {
-            user.getPlayers().add(new Goalkeeper(list.get(0)));
+            Goalkeeper goalkeeper = new Goalkeeper(list.get(0), list.get(1));
+            goalkeeper.setRatings(Integer.parseInt(list.get(2)));
+            goalkeeper.setPrice();
+            user.getPlayers().add(goalkeeper);
         }
     }
 
-    // splitting line up by spaces
+    public void addPlayerToMarket(ArrayList<String> list) {
+        if (list.get(1).contains("W") || list.get(1).contains("ST")) {
+            Forward forward = new Forward(list.get(0), list.get(1));
+            forward.setRatings(Integer.parseInt(list.get(2)));
+            market.getPlayers().add(forward);
+        } else if (list.get(1).contains("M")) {
+            Midfielder midfielder = new Midfielder(list.get(0), list.get(1));
+            midfielder.setRatings(Integer.parseInt(list.get(2)));
+            market.getPlayers().add(midfielder);
+        } else if (list.get(1).contains("B")) {
+            Defender defender = new Defender(list.get(0), list.get(1));
+            defender.setRatings(Integer.parseInt(list.get(2)));
+            market.getPlayers().add(defender);
+        } else if (list.get(1).contains("GK")) {
+            Goalkeeper goalkeeper = new Goalkeeper(list.get(0), list.get(1));
+            goalkeeper.setRatings(Integer.parseInt(list.get(2)));
+            market.getPlayers().add(goalkeeper);
+        }
+    }
+
+    // Splitting line up by spaces
     public static ArrayList<String> splitOnSpace(String line) {
         String[] splits = line.split(" ");
         return new ArrayList<>(Arrays.asList(splits));

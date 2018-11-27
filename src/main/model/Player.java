@@ -1,7 +1,5 @@
 package model;
 
-import exceptions.IncorrectPosition;
-
 public abstract class Player {
     private String name;
     private String position;
@@ -9,16 +7,14 @@ public abstract class Player {
     private int price;
     private User user;
 
-    public Player(String name) {
+    private final int PRICE_MULTIPLIER = 10;
+
+    public Player(String name, String position) {
         this.name = name;
-        position = "";
+        this.position = position;
         ratings = 0;
         price = 0;
         user = new User();
-    }
-
-    public void setPosition(String position) throws IncorrectPosition {
-        this.position = position;
     }
 
     // EFFECTS: returns the name of a player
@@ -31,9 +27,17 @@ public abstract class Player {
         return position;
     }
 
+    public void setRatings(int x) {
+        this.ratings = x;
+    }
+
     // EFFECTS: returns the ratings of a player
     public int getRatings() {
         return ratings;
+    }
+
+    public void setPrice() {
+        this.price = ratings * PRICE_MULTIPLIER;
     }
 
     public int getPrice() {

@@ -5,7 +5,7 @@ import exceptions.InsufficientBalance;
 
 import java.util.ArrayList;
 
-public abstract class TransferMarket {
+public class TransferMarket {
     private ArrayList<Player> players;
     private User user;
 
