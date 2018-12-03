@@ -519,11 +519,94 @@ public class PlayerManager extends JFrame implements ActionListener {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     int x = table.getSelectedRow();
-                                    model.removeRow(x);
-                                    user.addPlayer(market.getPlayers().get(x));
-                                    user.getWallet().removeBalance(market.getPlayers().get(x).getPrice());
-                                    market.removePlayer(market.getPlayers().get(x));
+                                    int y = user.getWallet().getBalance() - market.getPlayers().get(x).getPrice();
+                                    // Sufficient balance
+                                    if (y >= 0) {
+                                        model.removeRow(x);
+                                        user.addPlayer(market.getPlayers().get(x));
+                                        user.getWallet().removeBalance(market.getPlayers().get(x).getPrice());
+                                        market.removePlayer(market.getPlayers().get(x));
+                                    } else {
+                                        JFrame frame = new JFrame();
+                                        frame.setTitle("Player Manager");
+                                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                        frame.setSize(500, 650);
+                                        frame.setLocationRelativeTo(null);
+                                        frame.setResizable(false);
+                                        frame.setLayout(new FlowLayout());
 
+                                        JPanel panel1 = new JPanel();
+
+                                        JLabel label1 = new JLabel("Insufficient balance");
+                                        label1.setFont(new Font("Arial", Font.BOLD, 32));
+                                        label1.setForeground(Color.red);
+
+                                        panel1.add(label1);
+                                        frame.add(panel1);
+                                        // Image
+                                        frame.add(new JLabel(new ImageIcon()));
+
+                                        frame.setVisible(true);
+
+                                        JButton balanceButton = new JButton("Add balance");
+                                        balanceButton.setFont(new Font("Arial", Font.PLAIN, 32));
+                                        balanceButton.setActionCommand("balance");
+
+                                        JButton backButton = new JButton("Back");
+                                        backButton.setFont(new Font("Arial", Font.PLAIN, 32));
+                                        balanceButton.setActionCommand("back");
+
+                                        frame.add(balanceButton);
+                                        frame.add(backButton);
+
+                                        balanceButton.addActionListener(new ActionListener() {
+                                            @Override
+                                            public void actionPerformed(ActionEvent e) {
+                                                JFrame frame = new JFrame();
+                                                frame.setTitle("Player Manager");
+                                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                                frame.setSize(250, 400);
+                                                frame.setLocationRelativeTo(null);
+                                                frame.setResizable(false);
+                                                frame.setVisible(true);
+
+                                                JPanel panel1 = new JPanel();
+                                                frame.setLayout(new FlowLayout());
+
+                                                JLabel label1 = new JLabel("Enter amount of balance to add:");
+                                                label1.setFont(new Font("Arial", Font.PLAIN, 27));
+                                                panel1.add(label1);
+
+                                                JButton addButton = new JButton("Add");
+                                                addButton.setFont(new Font("Arial", Font.PLAIN, 27));
+                                                addButton.setActionCommand("add");
+
+                                                JTextField field = new JTextField();
+                                                field.setPreferredSize(new Dimension(120, 40));
+                                                field.setFont(new Font("Arial", Font.PLAIN, 27));
+
+                                                frame.add(panel1);
+                                                frame.add(field);
+                                                frame.add(addButton);
+                                                frame.pack();
+
+                                                addButton.addActionListener(new ActionListener() {
+                                                    @Override
+                                                    public void actionPerformed(ActionEvent e) {
+                                                        user.getWallet().addBalance(Integer.parseInt(field.getText()));
+                                                        frame.dispose();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        backButton.addActionListener(new ActionListener() {
+                                            @Override
+                                            public void actionPerformed(ActionEvent e) {
+                                                frame.dispose();
+                                            }
+                                        });
+                                    }
+                                    // Close confirm message
                                     frame.dispose();
                                 }
                             });
