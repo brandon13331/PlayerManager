@@ -12,8 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 
 public class PlayerManager extends JFrame implements ActionListener {
@@ -33,7 +32,7 @@ public class PlayerManager extends JFrame implements ActionListener {
     public PlayerManager() {
         setTitle("Player Manager");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(1000, 500));
+        setPreferredSize(new Dimension(600, 400));
         setLayout(new FlowLayout());
 
         JPanel panel1 = new JPanel();
@@ -42,21 +41,24 @@ public class PlayerManager extends JFrame implements ActionListener {
         // Welcome to player manager
         JLabel label1 = new JLabel("Welcome To Player Manager!");
         label1.setFont(new Font("Arial", Font.BOLD, 32));
+        label1.setForeground(Color.BLACK);
         panel1.add(label1);
         panel1.setLayout(new GridLayout(1, 1));
 
         // Select team
         JLabel label2 = new JLabel("Select team");
-        label2.setFont(new Font("Arial", Font.PLAIN, 27));
+        label2.setFont(new Font("Arial", Font.BOLD, 27));
         panel2.add(label2);
         panel2.setLayout(new GridLayout(1, 1));
 
         // Team
         rButton1 = new JRadioButton("Team A");
         rButton1.setFont(new Font("Arial", Font.PLAIN, 27));
+        rButton1.setForeground(Color.BLUE);
 
         rButton2 = new JRadioButton("Team B");
         rButton2.setFont(new Font("Arial", Font.PLAIN, 27));
+        rButton2.setForeground(Color.RED);
 
         // Select default
         rButton1.setSelected(true);
@@ -71,6 +73,10 @@ public class PlayerManager extends JFrame implements ActionListener {
         add(rButton1);
         add(rButton2);
         add(selectButton);
+
+        // Add image
+        add(new JLabel(new ImageIcon("C:/Users/Other user/Desktop/soccer.jpg")));
+
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
@@ -118,7 +124,7 @@ public class PlayerManager extends JFrame implements ActionListener {
         JFrame frame = new JFrame();
         frame.setTitle("Player Manager");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(500, 400);
+        frame.setSize(800, 450);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setVisible(true);
@@ -129,7 +135,7 @@ public class PlayerManager extends JFrame implements ActionListener {
         ((JPanel) getContentPane()).setBorder(new EmptyBorder(13, 13, 13, 13));
         frame.setLayout(new FlowLayout());
 
-        label1 = new JLabel("Enter");
+        label1 = new JLabel("Choose");
         label1.setFont(new Font("Arial", Font.BOLD, 32));
         panel1.add(label1);
 
@@ -147,15 +153,15 @@ public class PlayerManager extends JFrame implements ActionListener {
         enterButton.addActionListener(this);
 
         field = new JTextField();
-        field.setPreferredSize(new Dimension(80, 30));
+        field.setPreferredSize(new Dimension(100, 40));
         field.setFont(new Font("Arial", Font.PLAIN, 32));
 
         frame.add(panel1);
         frame.add(panel2);
         frame.add(panel3);
+        frame.add(new JLabel(new ImageIcon("C:/Users/Other user/Desktop/soccerplayer.png")));
         frame.add(field);
         frame.add(enterButton);
-        frame.pack();
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -167,7 +173,7 @@ public class PlayerManager extends JFrame implements ActionListener {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(500, 400);
+            frame.setSize(600, 550);
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
             frame.setLayout(new FlowLayout());
@@ -175,7 +181,7 @@ public class PlayerManager extends JFrame implements ActionListener {
             // Team A
             if (rButton1.isSelected()) {
                 // Column
-                String[] Column = {"Position", "Name"};
+                String[] Column = {"Type", "Name"};
                 model.setColumnIdentifiers(Column);
                 // Row
                 for (int i = 0; i < user.getPlayers().size(); i++) {
@@ -195,15 +201,86 @@ public class PlayerManager extends JFrame implements ActionListener {
                     model.addRow(data);
                 }
                 JTable table = new JTable(model);
-                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
-                table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                table.setPreferredScrollableViewportSize(new Dimension(500, 400));
                 table.setFillsViewportHeight(true);
+                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+                table.setRowHeight(30);
+                table.setFont(new Font("Arial", Font.PLAIN, 20));
 
                 // Table header
-                frame.add(new JScrollPane(table));
+                JScrollPane scroll = new JScrollPane(table);
+                frame.add(scroll);
 
+                // See top 11 button
+                JButton topButton = new JButton("See top 11 players");
+                topButton.setFont(new Font("Arial", Font.PLAIN, 20));
+                frame.add(topButton);
+
+                topButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        List<Player> topPlayers = new ArrayList<>();
+                        for (int i = 0; i < user.getPlayers().size(); i++) {
+                            topPlayers.add(user.getPlayers().get(i));
+                        }
+                        // Overriding sort method by setting a comparator
+                        Collections.sort(topPlayers, new Comparator<Player>() {
+                            @Override
+                            public int compare(Player o1, Player o2) {
+                                // Largest to smallest ratings
+                                return o2.getRatings() - o1.getRatings();
+                            }
+                        });
+                        JFrame frame = new JFrame();
+                        frame.setTitle("Player Manager");
+                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        frame.setSize(650, 410);
+                        frame.setLocationRelativeTo(null);
+                        frame.setResizable(false);
+                        frame.setLayout(new FlowLayout());
+
+                        DefaultTableModel model = new DefaultTableModel();
+                        // Column
+                        String[] Column = {" ", "Ratings", "Name"};
+                        model.setColumnIdentifiers(Column);
+                        // Row
+                        for (int i = 0; i < 11; i++) {
+                            String number = String.valueOf(i + 1);
+                            String ratings = String.valueOf(topPlayers.get(i).getRatings());
+                            String name = topPlayers.get(i).getName();
+
+                            Object[] data = {number, ratings, name};
+                            model.addRow(data);
+                        }
+
+                        JTable table = new JTable(model);
+                        table.setPreferredScrollableViewportSize(new Dimension(500, 400));
+                        table.setFillsViewportHeight(true);
+                        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+                        table.setRowHeight(30);
+                        table.setFont(new Font("Arial", Font.PLAIN, 20));
+
+                        // Table header
+                        JScrollPane scroll = new JScrollPane(table);
+                        frame.add(scroll);
+
+                        JButton closeButton = new JButton("Close");
+                        closeButton.setFont(new Font("Arial", Font.PLAIN, 20));
+                        frame.add(closeButton);
+
+                        frame.setVisible(true);
+
+                        closeButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                frame.dispose();
+                            }
+                        });
+                    }
+                });
                 // See details button
                 JButton detail1Button = new JButton("Show details");
+                detail1Button.setFont(new Font("Arial", Font.PLAIN, 20));
                 detail1Button.setActionCommand("detail1");
                 frame.add(detail1Button);
 
@@ -223,11 +300,13 @@ public class PlayerManager extends JFrame implements ActionListener {
                             JPanel panel2 = new JPanel();
                             JPanel panel3 = new JPanel();
                             JPanel panel4 = new JPanel();
+                            JPanel panel5 = new JPanel();
 
                             JLabel labelname1 = new JLabel("Name:");
                             labelname1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelname2 = new JLabel(user.getPlayers().get(table.getSelectedRow()).getName());
                             labelname2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelname2.setForeground(Color.BLUE);
 
                             panel1.add(labelname1);
                             panel1.add(labelname2);
@@ -236,6 +315,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelposition1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelposition2 = new JLabel(user.getPlayers().get(table.getSelectedRow()).getPosition());
                             labelposition2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelposition2.setForeground(Color.BLUE);
 
                             panel2.add(labelposition1);
                             panel2.add(labelposition2);
@@ -244,6 +324,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelratings1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelratings2 = new JLabel(String.valueOf(user.getPlayers().get(table.getSelectedRow()).getRatings()));
                             labelratings2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelratings2.setForeground(Color.BLUE);
 
                             panel3.add(labelratings1);
                             panel3.add(labelratings2);
@@ -252,21 +333,34 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelprice1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelprice2 = new JLabel(String.valueOf(user.getPlayers().get(table.getSelectedRow()).getPrice()));
                             labelprice2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelprice2.setForeground(Color.BLUE);
 
                             panel4.add(labelprice1);
                             panel4.add(labelprice2);
+
+                            JButton closeButton = new JButton("Close");
+                            closeButton.setFont(new Font("Arial", Font.PLAIN, 32));
+                            panel5.add(closeButton);
 
                             frame.add(panel1);
                             frame.add(panel2);
                             frame.add(panel3);
                             frame.add(panel4);
+                            frame.add(panel5);
 
+                            closeButton.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    frame.dispose();
+                                }
+                            });
                             frame.setVisible(true);
                         }
                     }
                 });
                 JButton sellButton = new JButton("Sell");
                 sellButton.setActionCommand("sell");
+                sellButton.setFont(new Font("Arial", Font.PLAIN, 20));
                 frame.add(sellButton);
 
                 sellButton.addActionListener(new ActionListener() {
@@ -289,6 +383,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label1a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label1b = new JLabel(user.getPlayers().get(table.getSelectedRow()).getName());
                             label1b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label1b.setForeground(Color.red);
                             panel1.add(label1a);
                             panel1.add(label1b);
 
@@ -296,6 +391,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label2a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label2b = new JLabel(String.valueOf(user.getWallet().getBalance()));
                             label2b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label2b.setForeground(Color.red);
                             panel2.add(label2a);
                             panel2.add(label2b);
 
@@ -303,6 +399,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label3a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label3b = new JLabel(String.valueOf((user.getWallet().getBalance() + user.getPlayers().get(table.getSelectedRow()).getPrice())));
                             label3b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label3b.setForeground(Color.red);
                             panel3.add(label3a);
                             panel3.add(label3b);
 
@@ -354,7 +451,7 @@ public class PlayerManager extends JFrame implements ActionListener {
             JFrame frame = new JFrame();
             frame.setTitle("Player Manager");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(500, 400);
+            frame.setSize(600, 550);
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
             frame.setLayout(new FlowLayout());
@@ -382,15 +479,19 @@ public class PlayerManager extends JFrame implements ActionListener {
                     model.addRow(data);
                 }
                 JTable table = new JTable(model);
-                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
-                table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                table.setPreferredScrollableViewportSize(new Dimension(500, 400));
                 table.setFillsViewportHeight(true);
+                table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+                table.setRowHeight(30);
+                table.setFont(new Font("Arial", Font.PLAIN, 20));
 
                 // Table header
-                frame.add(new JScrollPane(table));
+                JScrollPane scroll = new JScrollPane(table);
+                frame.add(scroll);
 
                 // See details button
                 JButton detail2Button = new JButton("Show details");
+                detail2Button.setFont(new Font("Arial", Font.PLAIN, 20));
                 detail2Button.setActionCommand("detail2");
                 frame.add(detail2Button);
 
@@ -416,6 +517,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelname1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelname2 = new JLabel(market.getPlayers().get(table.getSelectedRow()).getName());
                             labelname2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelname2.setForeground(Color.BLUE);
 
                             panel1.add(labelname1);
                             panel1.add(labelname2);
@@ -424,6 +526,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelposition1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelposition2 = new JLabel(market.getPlayers().get(table.getSelectedRow()).getPosition());
                             labelposition2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelposition2.setForeground(Color.BLUE);
 
                             panel2.add(labelposition1);
                             panel2.add(labelposition2);
@@ -432,6 +535,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelratings1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelratings2 = new JLabel(String.valueOf(market.getPlayers().get(table.getSelectedRow()).getRatings()));
                             labelratings2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelratings2.setForeground(Color.BLUE);
 
                             panel3.add(labelratings1);
                             panel3.add(labelratings2);
@@ -440,6 +544,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             labelprice1.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel labelprice2 = new JLabel(String.valueOf(market.getPlayers().get(table.getSelectedRow()).getPrice()));
                             labelprice2.setFont(new Font("Arial", Font.PLAIN, 32));
+                            labelprice2.setForeground(Color.BLUE);
 
                             panel4.add(labelprice1);
                             panel4.add(labelprice2);
@@ -465,6 +570,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                     }
                 });
                 JButton purchaseButton = new JButton("Purchase");
+                purchaseButton.setFont(new Font("Arial", Font.PLAIN, 20));
                 purchaseButton.setActionCommand("purchase");
                 frame.add(purchaseButton);
 
@@ -488,6 +594,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label1a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label1b = new JLabel(market.getPlayers().get(table.getSelectedRow()).getName());
                             label1b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label1b.setForeground(Color.red);
                             panel1.add(label1a);
                             panel1.add(label1b);
 
@@ -495,6 +602,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label2a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label2b = new JLabel(String.valueOf(user.getWallet().getBalance()));
                             label2b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label2b.setForeground(Color.red);
                             panel2.add(label2a);
                             panel2.add(label2b);
 
@@ -502,6 +610,7 @@ public class PlayerManager extends JFrame implements ActionListener {
                             label3a.setFont(new Font("Arial", Font.BOLD, 32));
                             JLabel label3b = new JLabel(String.valueOf((user.getWallet().getBalance() - market.getPlayers().get(table.getSelectedRow()).getPrice())));
                             label3b.setFont(new Font("Arial", Font.PLAIN, 32));
+                            label3b.setForeground(Color.red);
                             panel3.add(label3a);
                             panel3.add(label3b);
 
@@ -512,7 +621,8 @@ public class PlayerManager extends JFrame implements ActionListener {
                             frame.setVisible(true);
 
                             JButton confirmButton = new JButton("Confirm");
-                            confirmButton.setActionCommand("confirm");
+                            confirmButton.setFont(new Font("Arial", Font.PLAIN, 32));
+                            confirmButton.setActionCommand("confirm1");
                             frame.add(confirmButton);
 
                             confirmButton.addActionListener(new ActionListener() {
@@ -543,8 +653,7 @@ public class PlayerManager extends JFrame implements ActionListener {
 
                                         panel1.add(label1);
                                         frame.add(panel1);
-                                        // Image
-                                        frame.add(new JLabel(new ImageIcon()));
+                                        frame.add(new JLabel(new ImageIcon("C:/Users/Other user/Desktop/alert.jpg")));
 
                                         frame.setVisible(true);
 
